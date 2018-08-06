@@ -7,17 +7,22 @@ import platform
 import subprocess
 
 
-def ping(ip_addr, count):
+def ping(ip_addr, count, version):
     """Ping specified IP address 'count' times"""
 
+    command = 'ping'
     count_parm = '-c'  # Count flag, default to unix usage
     count_num = count  # Number of pings to send
 
+    # Platform specific modifications
+    # Use ping6 command for Linux, some distributions require it
+    if platform.system() == 'Linux' and version == 6:
+        command = 'ping6'
     # Change count flag if on Windows system
-    if platform.system() == 'Windows':
+    elif platform.system() == 'Windows':
         count_parm = '-n'
 
-    return subprocess.call(['ping', count_parm, str(count_num), ip_addr]) == 0
+    return subprocess.call([command, count_parm, str(count_num), ip_addr]) == 0
 
 
 addresses = []  # List of IP addresses
@@ -55,4 +60,4 @@ file.close()
 
 # Ping all of the addresses
 for address in addresses:
-    ping(str(address), args.c[0])
+    ping(str(address), args.c[0], address.version)
