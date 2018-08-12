@@ -1,31 +1,28 @@
 #!/usr/bin/env python3
-import argparse
 import logging
+import argparse
 import sys
 import ipaddress
-import platform
-import subprocess
+import threading
+
+from src.host import Host
+import src.pinger as pinger
 
 
-def ping(ip_addr, count, version):
-    """Ping specified IP address 'count' times"""
+def positive_int(in_value):
+    try:
+        value = int(in_value)
+    except ValueError:
+        raise argparse.ArgumentTypeError(in_value + " is not a valid positive integer")
 
-    command = 'ping'
-    count_parm = '-c'  # Count flag, default to unix usage
-    count_num = count  # Number of pings to send
+    if value <= 0:
+        raise argparse.ArgumentTypeError(in_value + " is not a valid positive integer")
 
-    # Platform specific modifications
-    # Use ping6 command for Linux, some distributions require it
-    if platform.system() == 'Linux' and version == 6:
-        command = 'ping6'
-    # Change count flag if on Windows system
-    elif platform.system() == 'Windows':
-        count_parm = '-n'
-
-    return subprocess.call([command, count_parm, str(count_num), ip_addr]) == 0
+    return value
 
 
-addresses = []  # List of IP addresses
+DEFAULT_TIME = 30     # Default update cycle time
+DEFAULT_PING_NUM = 1  # Default number of pings to send
 
 # Format log, remove username and insert a space
 logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.DEBUG)
@@ -33,7 +30,8 @@ logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.DEBUG)
 # Parse command line arguments
 parser = argparse.ArgumentParser(description="Network monitoring dashboard")
 parser.add_argument('path', help="path to configuration file")
-parser.add_argument('-c', '-count', nargs=1, type=int, default=[1], help="number of pings to send")
+parser.add_argument('-t', '-time', nargs=1, type=positive_int, default=[DEFAULT_TIME], help="update cycle time")
+parser.add_argument('-c', '-count', nargs=1, type=positive_int, default=[DEFAULT_PING_NUM], help="num of pings to send")
 args = parser.parse_args()
 
 # Open configuration file at specified path
@@ -48,16 +46,25 @@ except IsADirectoryError:
 
 # Parse configuration file
 for line_num, line in enumerate(file.readlines()):
+    line = line.strip()
+
+    if not line or line[0] == '#':
+        continue
+
     try:
-        addr = ipaddress.ip_address(line.strip())
+        addr = ipaddress.ip_address(line)
     except ValueError:
         logging.error("IP address on line " + str(line_num + 1) + " is not valid, skipping it.")
         continue
 
-    addresses.append(addr)
+    Host.hosts.append(Host(addr))
 
 file.close()
 
-# Ping all of the addresses
-for address in addresses:
-    ping(str(address), args.c[0], address.version)
+# Start pinger thread
+threading.Thread(target=pinger.ping_all, args=(args.c[0], args.t[0]), name="Pinger", daemon=True).start()
+
+while True:
+    # TODO: Start UI here
+    pass
+

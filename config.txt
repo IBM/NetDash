@@ -1,3 +1,6 @@
+# This is a comment, the program will skip this line, and any blank lines
+# The first two IP addresses should always succeed (or there is a problem with your network stack)
+# The last IP should always fail (reserved address)
 127.0.0.1
 ::1
-192.168.1.150
+0.0.0.0
