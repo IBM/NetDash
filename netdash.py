@@ -10,6 +10,8 @@ import src.pinger as pinger
 
 
 def positive_int(in_value):
+    """Check if argument is a positive integer"""
+
     try:
         value = int(in_value)
     except ValueError:
@@ -24,14 +26,17 @@ def positive_int(in_value):
 DEFAULT_TIME = 30     # Default update cycle time
 DEFAULT_PING_NUM = 1  # Default number of pings to send
 
+TIME_HELP = "update cycle time (in seconds)"  # Time argument help message
+COUNT_HELP = "number of pings to send"        # Count argument help message
+
 # Format log, remove username and insert a space
 logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.DEBUG)
 
 # Parse command line arguments
 parser = argparse.ArgumentParser(description="Network monitoring dashboard")
 parser.add_argument('path', help="path to configuration file")
-parser.add_argument('-t', '-time', nargs=1, type=positive_int, default=[DEFAULT_TIME], help="update cycle time")
-parser.add_argument('-c', '-count', nargs=1, type=positive_int, default=[DEFAULT_PING_NUM], help="num of pings to send")
+parser.add_argument('-t', '-time', nargs=1, type=positive_int, default=[DEFAULT_TIME], help=TIME_HELP)
+parser.add_argument('-c', '-count', nargs=1, type=positive_int, default=[DEFAULT_PING_NUM], help=COUNT_HELP)
 args = parser.parse_args()
 
 # Open configuration file at specified path
@@ -48,9 +53,11 @@ except IsADirectoryError:
 for line_num, line in enumerate(file.readlines()):
     line = line.strip()
 
+    # Skip blank lines and comments
     if not line or line[0] == '#':
         continue
 
+    # Check validity of ip address, otherwise, skip it
     try:
         addr = ipaddress.ip_address(line)
     except ValueError:
