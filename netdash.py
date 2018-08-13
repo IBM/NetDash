@@ -7,6 +7,7 @@ import threading
 
 from src.host import Host
 import src.pinger as pinger
+import src.ui as ui
 
 
 def positive_int(in_value):
@@ -71,7 +72,7 @@ file.close()
 # Start pinger thread
 threading.Thread(target=pinger.ping_all, args=(args.c[0], args.t[0]), name="Pinger", daemon=True).start()
 
-while True:
-    # TODO: Start UI here
-    pass
+# Start GUI
+# TODO: Needs check if X is running in Linux, something similar for Windows, probably add TUI flag (look into curses)
+ui.start_gui()
 

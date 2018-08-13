@@ -37,6 +37,9 @@ def ping_all(count, cycle_time):
                 host.status = "FAIL"
             else:
                 host.status = "OTHER"
+            # Update widget if GUI
+            if host.widget is not None:
+                host.widget.config(text=host.status)
 
         # Sleep for cycle_time seconds before pinging again
         time.sleep(cycle_time)
