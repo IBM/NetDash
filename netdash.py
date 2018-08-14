@@ -31,7 +31,7 @@ TIME_HELP = "update cycle time (in seconds)"  # Time argument help message
 COUNT_HELP = "number of pings to send"        # Count argument help message
 
 # Format log, remove username and insert a space
-logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.DEBUG)
+logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', level=logging.INFO, datefmt='%m/%d/%Y %I:%M:%S %p')
 
 # Parse command line arguments
 parser = argparse.ArgumentParser(description="Network monitoring dashboard")

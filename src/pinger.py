@@ -1,5 +1,7 @@
 import platform
 import subprocess
+import logging
+import threading
 import time
 
 from src.host import Host
@@ -19,27 +21,44 @@ def ping(ip_addr, count, version):
     elif platform.system() == 'Windows':
         count_parm = '-n'
 
-    return subprocess.call([command, count_parm, str(count), ip_addr])
+    return subprocess.call([command, count_parm, str(count), ip_addr], stdout=subprocess.DEVNULL)
+
+
+def ping_host(host, count):
+    """Ping all hosts 'count' times"""
+
+    result = ping(str(host.ip), count, host.ip.version)
+
+    # Update status of hosts based on ping result
+    if not result:
+        host.status = "SUCCESS"
+    elif result == 1:
+        host.status = "FAIL"
+    else:
+        host.status = "OTHER"
+    # Update widget if GUI
+    if host.widget is not None:
+        host.widget.config(text=host.status)
+
+    logging.info("Host " + str(host.ip) + " Result " + host.status)
 
 
 def ping_all(count, cycle_time):
-    """Ping all hosts 'count' times every 'cycle_time' seconds"""
+    """Spawn a thread to ping each host, then sleep for cycle_time seconds"""
 
     while True:
-        # Ping all of the addresses
-        for host in Host.hosts:
-            result = ping(str(host.ip), count, host.ip.version)
+        threads = []
 
-            # Update status of hosts based on ping result
-            if not result:
-                host.status = "SUCCESS"
-            elif result == 1:
-                host.status = "FAIL"
-            else:
-                host.status = "OTHER"
-            # Update widget if GUI
-            if host.widget is not None:
-                host.widget.config(text=host.status)
+        # Ping all of the addresses in a thread
+        for idx, host in enumerate(Host.hosts):
+            name = "Pinger-" + str(idx)
+            thread = threading.Thread(target=ping_host, args=(host, count), name=name, daemon=True)
+            threads.append(thread)
+            thread.start()
 
         # Sleep for cycle_time seconds before pinging again
         time.sleep(cycle_time)
+
+        # Don't start pinging again until all threads are done
+        for thread in threads:
+            thread.join()
