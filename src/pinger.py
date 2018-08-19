@@ -32,13 +32,16 @@ def ping_host(host, count):
     # Update status of hosts based on ping result
     if not result:
         host.status = "SUCCESS"
+        status_color = "green2"
     elif result == 1:
         host.status = "FAIL"
+        status_color = "red2"
     else:
         host.status = "OTHER"
+        status_color = "orange2"
     # Update widget if GUI
-    if host.widget is not None:
-        host.widget.config(text=host.status)
+    if host.status_widget is not None:
+        host.set_status_color(status_color)
 
     logging.info("Host " + str(host.ip) + " Result " + host.status)
 

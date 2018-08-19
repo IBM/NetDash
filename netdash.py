@@ -10,6 +10,13 @@ import src.pinger as pinger
 import src.ui as ui
 
 
+DEFAULT_TIME = 30     # Default update cycle time
+DEFAULT_PING_NUM = 1  # Default number of pings to send
+
+TIME_HELP = "update cycle time (in seconds)"  # Time argument help message
+COUNT_HELP = "number of pings to send"        # Count argument help message
+
+
 def positive_int(in_value):
     """Check if argument is a positive integer"""
 
@@ -23,12 +30,6 @@ def positive_int(in_value):
 
     return value
 
-
-DEFAULT_TIME = 30     # Default update cycle time
-DEFAULT_PING_NUM = 1  # Default number of pings to send
-
-TIME_HELP = "update cycle time (in seconds)"  # Time argument help message
-COUNT_HELP = "number of pings to send"        # Count argument help message
 
 # Format log, remove username and insert a space
 logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', level=logging.INFO, datefmt='%m/%d/%Y %I:%M:%S %p')
