@@ -1,10 +1,13 @@
 # This is a comment, the program will skip this line, and any blank lines
 # All but the last IP address should always succeed
-127.0.0.1
-::1
+# Quotes are required for the LABEL if it includes a space
+# Format: IP_ADDRESS "LABEL"
+
+127.0.0.1 "IPv4 Loopback 1"
+::1       "IPv6 Loopback"
 127.0.0.2
 127.0.0.3
 127.0.0.4
 
 127.0.0.5
-0.0.0.0
+0.0.0.0 "IPv4 Any"

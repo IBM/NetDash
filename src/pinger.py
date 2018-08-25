@@ -11,7 +11,7 @@ def ping(ip_addr, count, version):
     """Ping IP address 'count' times"""
 
     command = 'ping'   # Ping command, default to ipv4
-    count_parm = '-c'  # Count flag, default to unix usage
+    count_parm = '-c'  # Count flag, default to unix
 
     # Platform specific modifications
     # Use ping6 command for Linux, some distributions require it

@@ -2,6 +2,7 @@
 import logging
 import argparse
 import sys
+import shlex
 import ipaddress
 import threading
 
@@ -58,15 +59,23 @@ for line_num, line in enumerate(file.readlines()):
     # Skip blank lines and comments
     if not line or line[0] == '#':
         continue
+    line_parts = shlex.split(line)
 
     # Check validity of ip address, otherwise, skip it
     try:
-        addr = ipaddress.ip_address(line)
+        addr = ipaddress.ip_address(line_parts[0])
     except ValueError:
         logging.error("IP address on line " + str(line_num + 1) + " is not valid, skipping it.")
         continue
 
-    Host.hosts.append(Host(addr))
+    # Subsequent additions of optional fields will require a "None" value to be supported
+    # If a label exists, use it
+    label = None
+    if len(line_parts) > 1:
+        label = line_parts[1]
+
+    # Add the host to the list
+    Host.hosts.append(Host(addr, label=label))
 
 file.close()
 
