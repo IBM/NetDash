@@ -14,8 +14,9 @@ import src.ui as ui
 DEFAULT_TIME = 30     # Default update cycle time
 DEFAULT_PING_NUM = 1  # Default number of pings to send
 
-TIME_HELP = "update cycle time (in seconds)"  # Time argument help message
-COUNT_HELP = "number of pings to send"        # Count argument help message
+TIME_HELP = "update cycle time (in seconds)"                # Time argument help message
+COUNT_HELP = "number of pings to send per host each cycle"  # Count argument help message
+QUIET_HELP = "supress informational messages"               # Quiet argument help message
 
 
 def positive_int(in_value):
@@ -38,9 +39,17 @@ logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', level=loggi
 # Parse command line arguments
 parser = argparse.ArgumentParser(description="Network monitoring dashboard")
 parser.add_argument('path', help="path to configuration file")
-parser.add_argument('-t', '-time', nargs=1, type=positive_int, default=[DEFAULT_TIME], help=TIME_HELP)
-parser.add_argument('-c', '-count', nargs=1, type=positive_int, default=[DEFAULT_PING_NUM], help=COUNT_HELP)
+parser.add_argument('-t', '-time', nargs=1, type=positive_int, default=[DEFAULT_TIME], metavar='#', help=TIME_HELP)
+parser.add_argument('-c', '-count', nargs=1, type=positive_int, default=[DEFAULT_PING_NUM], metavar='#',
+                    help=COUNT_HELP)
+parser.add_argument('-q', '-quiet', action='store_true', help=QUIET_HELP)
+# TODO: Add -t -text option for tui
+
 args = parser.parse_args()
+
+# If quiet option is set, only display messages at warning and above
+if args.q:
+    logging.getLogger().setLevel(logging.WARNING)
 
 # Open configuration file at specified path
 try:
@@ -82,7 +91,6 @@ file.close()
 # Start pinger thread
 threading.Thread(target=pinger.ping_all, args=(args.c[0], args.t[0]), name="Pinger", daemon=True).start()
 
-# Start GUI
-# TODO: Needs check if X is running in Linux, something similar for Windows, probably add TUI flag (look into curses)
+# Start GUI if tui not specified
 ui.start_gui()
 

@@ -8,7 +8,7 @@ Python 3.5 or later with Tcl/Tk
 Requires configuration file, see example in config.txt
 
 # Usage
- netdash.py [-h] [-t T] [-c C] path
+ netdash.py [-h] [-t T] [-c C] [-q] path
 
 ### positional arguments
 path - path to configuration file
@@ -18,4 +18,6 @@ path - path to configuration file
   
 -t T, -time T - update cycle time (in seconds)
   
--c C, -count C - number of pings to send
+-c C, -count C - number of pings to send per host each cycle
+
+-q, -quiet - supress informational messages
