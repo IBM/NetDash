@@ -2,7 +2,7 @@
 Platform agnostic network monitoring dashboard
 
 # Dependencies
-Python 3.5 or later
+Python 3.5 or later with Tcl/Tk
 
 # Setup
 Requires configuration file, see example in config.txt

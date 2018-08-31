@@ -1,4 +1,11 @@
-import tkinter as tk
+import logging
+import sys
+try:
+    import tkinter as tk
+except ImportError:
+    logging.critical("Can not import tkinter, may not be installed.")
+    # TODO: Replace exit call with call to tui, change logging level to error
+    sys.exit(1)
 
 from src.host import Host
 
@@ -40,6 +47,7 @@ class App:
 
 
 def start_gui():
+
     # Initialize and start the tkinter GUI
     root = tk.Tk()
     root.title("NetDash")
