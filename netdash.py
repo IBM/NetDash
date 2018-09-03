@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
-import logging
+"""Program Start"""
+
 import argparse
-import sys
-import shlex
 import ipaddress
+import logging
+import shlex
+import sys
 import threading
 
-from src.host import Host
 import src.pinger as pinger
 import src.ui as ui
+import src.config as config
+from src.host import Host
 
 
 DEFAULT_TIME = 30     # Default update cycle time
@@ -43,9 +46,10 @@ parser.add_argument('-t', '-time', nargs=1, type=positive_int, default=[DEFAULT_
 parser.add_argument('-c', '-count', nargs=1, type=positive_int, default=[DEFAULT_PING_NUM], metavar='#',
                     help=COUNT_HELP)
 parser.add_argument('-q', '-quiet', action='store_true', help=QUIET_HELP)
-# TODO: Add -t -text option for tui
 
 args = parser.parse_args()
+config.cycle_time = args.t[0]
+config.ping_number = args.c[0]
 
 # If quiet option is set, only display messages at warning and above
 if args.q:
@@ -89,8 +93,7 @@ for line_num, line in enumerate(file.readlines()):
 file.close()
 
 # Start pinger thread
-threading.Thread(target=pinger.ping_all, args=(args.c[0], args.t[0]), name="Pinger", daemon=True).start()
+threading.Thread(target=pinger.ping_all, name="Pinger", daemon=True).start()
 
-# Start GUI if tui not specified
+# Start GUI
 ui.start_gui()
-

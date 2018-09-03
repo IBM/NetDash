@@ -1,10 +1,14 @@
+"""Pinging hosts"""
+
 import platform
 import subprocess
 import logging
 import threading
-import time
 
+import src.config as config
 from src.host import Host
+
+ping_all_event = threading.Event()
 
 
 def ping(ip_addr, count, version):
@@ -46,7 +50,12 @@ def ping_host(host, count):
     logging.info("Host " + str(host.ip) + " Result " + host.status)
 
 
-def ping_all(count, cycle_time):
+def refresh():
+    """Set ping_all_event to trigger ping_all"""
+    ping_all_event.set()
+
+
+def ping_all():
     """Spawn a thread to ping each host, then sleep for cycle_time seconds"""
 
     while True:
@@ -54,13 +63,14 @@ def ping_all(count, cycle_time):
 
         # Ping all of the addresses in a thread
         for idx, host in enumerate(Host.hosts):
-            name = "Pinger-" + str(idx)
-            thread = threading.Thread(target=ping_host, args=(host, count), name=name, daemon=True)
+            name = "Ping-" + str(idx)
+            thread = threading.Thread(target=ping_host, args=(host, config.ping_number), name=name, daemon=True)
             threads.append(thread)
             thread.start()
 
         # Sleep for cycle_time seconds before pinging again
-        time.sleep(cycle_time)
+        ping_all_event.clear()
+        ping_all_event.wait(config.cycle_time)
 
         # Don't start pinging again until all threads are done
         for thread in threads:
