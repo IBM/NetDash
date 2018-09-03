@@ -45,15 +45,14 @@ parser.add_argument('path', help="path to configuration file")
 parser.add_argument('-t', '-time', nargs=1, type=positive_int, default=[DEFAULT_TIME], metavar='#', help=TIME_HELP)
 parser.add_argument('-c', '-count', nargs=1, type=positive_int, default=[DEFAULT_PING_NUM], metavar='#',
                     help=COUNT_HELP)
-parser.add_argument('-q', '-quiet', action='store_true', help=QUIET_HELP)
+parser.add_argument('-q', '-quiet', action='store_true', default=False, help=QUIET_HELP)
 
 args = parser.parse_args()
 config.cycle_time = args.t[0]
 config.ping_number = args.c[0]
 
-# If quiet option is set, only display messages at warning and above
-if args.q:
-    logging.getLogger().setLevel(logging.WARNING)
+# Set quiet option
+config.set_quiet(args.q)
 
 # Open configuration file at specified path
 try:

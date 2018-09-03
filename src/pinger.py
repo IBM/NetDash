@@ -8,7 +8,7 @@ import threading
 import src.config as config
 from src.host import Host
 
-ping_all_event = threading.Event()
+ping_all_event = threading.Event()  # Threading event for pinging all hosts
 
 
 def ping(ip_addr, count, version):
@@ -48,11 +48,6 @@ def ping_host(host, count):
         host.set_status_color(status_color)
 
     logging.info("Host " + str(host.ip) + " Result " + host.status)
-
-
-def refresh():
-    """Set ping_all_event to trigger ping_all"""
-    ping_all_event.set()
 
 
 def ping_all():
