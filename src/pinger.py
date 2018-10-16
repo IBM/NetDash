@@ -6,14 +6,16 @@ import logging
 import threading
 
 import src.config as config
-from src.host import Host
+from src.host import hosts
 
 ping_all_event = threading.Event()  # Threading event for pinging all hosts
 
 
-def ping(ip_addr, count, version):
+def ping(host, count):
     """Ping IP address 'count' times"""
 
+    ip_addr = str(host.ip)
+    version = host.ip.version
     command = 'ping'   # Ping command, default to ipv4
     count_parm = '-c'  # Count flag, default to unix
 
@@ -25,29 +27,17 @@ def ping(ip_addr, count, version):
     elif platform.system() == 'Windows':
         count_parm = '-n'
 
-    return subprocess.call([command, count_parm, str(count), ip_addr], stdout=subprocess.DEVNULL)
+    result = subprocess.call([command, count_parm, str(count), ip_addr], stdout=subprocess.DEVNULL)
 
-
-def ping_host(host, count):
-    """Ping all hosts 'count' times"""
-
-    result = ping(str(host.ip), count, host.ip.version)
-
-    # Update status of hosts based on ping result
+    # Update status of host based on ping result
     if not result:
-        host.status = "SUCCESS"
-        status_color = "green2"
+        host.set_status("SUCCESS")
     elif result == 1:
-        host.status = "FAIL"
-        status_color = "red2"
+        host.set_status("FAIL")
     else:
-        host.status = "OTHER"
-        status_color = "orange2"
-    # Update widget if GUI
-    if host.status_widget is not None:
-        host.set_status_color(status_color)
+        host.set_status("OTHER")
 
-    logging.info("Host " + str(host.ip) + " Result " + host.status)
+    logging.info("Host: " + str(host.ip) + " Result: " + host.status)
 
 
 def ping_all():
@@ -57,9 +47,9 @@ def ping_all():
         threads = []
 
         # Ping all of the addresses in a thread
-        for idx, host in enumerate(Host.hosts):
+        for idx, host in enumerate(hosts):
             name = "Ping-" + str(idx)
-            thread = threading.Thread(target=ping_host, args=(host, config.ping_number), name=name, daemon=True)
+            thread = threading.Thread(target=ping, args=(host, config.ping_number), name=name, daemon=True)
             threads.append(thread)
             thread.start()
 

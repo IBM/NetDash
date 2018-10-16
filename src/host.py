@@ -1,10 +1,16 @@
 """Holds the Host class"""
 
+STATUS_COLORS = {         # Colors representing status
+    "SUCCESS": "green2",
+    "FAIL": "red2",
+    "OTHER": "orange2"
+}
+
+hosts = []                # List of all hosts
+
 
 class Host:
-    """Host class, holds list of all hosts"""
-
-    hosts = []
+    """Host class"""
 
     def __init__(self, ip_address, label=None):
         self.ip = ip_address
@@ -15,8 +21,11 @@ class Host:
         if label:
             self.label = label
 
-    def set_status_color(self, status_color):
-        """Set the color of the status widget to status_color"""
+    def set_status(self, status):
+        """Set the status of the Host and update the status color (if applicable)"""
 
-        self.status_widget.delete("all")
-        self.status_widget.create_rectangle(0, 0, 100, 50, fill=status_color)
+        self.status = status
+
+        if self.status_widget is not None:
+            self.status_widget.delete("all")
+            self.status_widget.create_rectangle(0, 0, 100, 50, fill=STATUS_COLORS[status])

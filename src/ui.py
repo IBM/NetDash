@@ -11,7 +11,7 @@ except ImportError:
     sys.exit(3)
 
 import src.config as config
-from src.host import Host
+from src.host import hosts
 from src.pinger import ping_all_event
 
 
@@ -45,7 +45,7 @@ class App:
         row = -1
         column = 0
 
-        for idx, host in enumerate(Host.hosts):
+        for idx, host in enumerate(hosts):
 
             # Every 5 hosts, create a new row of hosts
             if idx % App.COLUMN_LIMIT == 0:
@@ -104,6 +104,7 @@ class App:
     def apply_settings(self):
         """Check and apply settings from settings window"""
 
+        # Ensure entered cycle_time is non-zero positive integer
         try:
             cycle_time = int(self.cycle_entry.get())
         except ValueError:
@@ -118,6 +119,7 @@ class App:
 
         config.cycle_time = cycle_time
 
+        # Ensure entered ping_number is non-zero positive integer
         try:
             ping_number = int(self.count_entry.get())
         except ValueError:
@@ -150,5 +152,3 @@ def start_gui():
     root.title("NetDash")
     app = App(root)
     root.mainloop()
-
-# TODO: Add start_tui() function, likely use curses

@@ -11,7 +11,7 @@ import threading
 import src.pinger as pinger
 import src.ui as ui
 import src.config as config
-from src.host import Host
+from src.host import Host, hosts
 
 
 DEFAULT_TIME = 30     # Default update cycle time
@@ -87,7 +87,7 @@ for line_num, line in enumerate(file.readlines()):
         label = line_parts[1]
 
     # Add the host to the list
-    Host.hosts.append(Host(addr, label=label))
+    hosts.append(Host(addr, label=label))
 
 file.close()
 
