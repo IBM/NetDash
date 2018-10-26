@@ -1,8 +1,9 @@
 """Configuration variables"""
 import logging
 
-cycle_time = 0
-ping_number = 0
+path = ""
+cycle_time = 30
+ping_count = 1
 quiet = False
 
 

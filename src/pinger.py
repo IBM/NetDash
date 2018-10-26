@@ -49,7 +49,7 @@ def ping_all():
         # Ping all of the addresses in a thread
         for idx, host in enumerate(hosts):
             name = "Ping-" + str(idx)
-            thread = threading.Thread(target=ping, args=(host, config.ping_number), name=name, daemon=True)
+            thread = threading.Thread(target=ping, args=(host, config.ping_count), name=name, daemon=True)
             threads.append(thread)
             thread.start()
 

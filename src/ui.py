@@ -17,23 +17,27 @@ from src.pinger import ping_all_event
 
 class App:
     """GUI Application Class"""
+    # TODO: If possible, display text if no hosts configured
+    # TODO: Add way to modify hosts while running
 
     COLUMN_LIMIT = 5          # Maximum number of hosts displayed in a row
     STATUS_WIDTH = 100        # Width of status rectangle
     STATUS_HEIGHT = 50        # Height of status regtangle
     DEFAULT_COLOR = "gray45"  # Default status rectangle color
 
-    def __init__(self, master):
-        self.sett_win = None      # Settings window
-        self.cycle_entry = None   # cycle entry widget in settings window
-        self.count_entry = None   # count entry widget in settings window
-        self.quiet = None         # Quiet mode variable for widget in settings window
+    def __init__(self, master, errors):
+        self.conf_win = None         # Settings window
+        self.cycle_entry = None      # cycle entry widget in settings window
+        self.count_entry = None      # count entry widget in settings window
+        self.quiet = None            # Quiet mode variable for widget in settings window
+        self.config_errors = errors  # Strings for error windows that need to be created
 
+        # TODO: Spawn error windows at some point, log error string also
         # Menu bar
         menu_bar = tk.Menu(master)
         # File menu
         file_menu = tk.Menu(menu_bar, tearoff=0)
-        file_menu.add_command(label="Settings", command=self.settings_window)
+        file_menu.add_command(label="Configuration", command=self.configuration_window)
         file_menu.add_separator()
         file_menu.add_command(label="Exit", command=master.quit)
 
@@ -68,27 +72,28 @@ class App:
 
             column += 1
 
-    def settings_window(self):
-        """Settings window accessed through file menu in menu bar"""
+    def configuration_window(self):
+        """Configuration window accessed through file menu in menu bar."""
 
-        self.sett_win = tk.Toplevel()
-        self.sett_win.title("Program Settings")
+        self.conf_win = tk.Toplevel()
+        self.conf_win.title("Program Configuration")
 
         # Setting labels
-        tk.Label(self.sett_win, text="Update Cycle Time (seconds):").grid(row=0)
-        tk.Label(self.sett_win, text="Ping Count:").grid(row=1)
-        tk.Label(self.sett_win, text="Quiet Mode:").grid(row=2)
+        tk.Label(self.conf_win, text="Update Cycle Time (seconds):").grid(row=0)
+        tk.Label(self.conf_win, text="Ping Count:").grid(row=1)
+        tk.Label(self.conf_win, text="Quiet Mode:").grid(row=2)
 
         # Entry fields
-        self.cycle_entry = tk.Entry(self.sett_win)
-        self.count_entry = tk.Entry(self.sett_win)
+        self.cycle_entry = tk.Entry(self.conf_win)
+        self.count_entry = tk.Entry(self.conf_win)
 
         # Quiet mode checkbutton
         self.quiet = tk.BooleanVar()
-        quiet_check_button = tk.Checkbutton(self.sett_win, variable=self.quiet)
+        quiet_check_button = tk.Checkbutton(self.conf_win, variable=self.quiet)
 
+        # TODO: Add cancel button, adjust location of apply button if nessisary
         # Apply button
-        apply_button = tk.Button(self.sett_win, text="Apply", command=self.apply_settings)
+        apply_button = tk.Button(self.conf_win, text="Apply", command=self.apply_settings)
 
         # Grid layout
         self.cycle_entry.grid(row=0, column=1)
@@ -98,7 +103,7 @@ class App:
 
         # Default values
         self.cycle_entry.insert(0, str(config.cycle_time))
-        self.count_entry.insert(0, str(config.ping_number))
+        self.count_entry.insert(0, str(config.ping_count))
         self.quiet.set(config.quiet)
 
     def apply_settings(self):
@@ -119,7 +124,7 @@ class App:
 
         config.cycle_time = cycle_time
 
-        # Ensure entered ping_number is non-zero positive integer
+        # Ensure entered ping_count is non-zero positive integer
         try:
             ping_number = int(self.count_entry.get())
         except ValueError:
@@ -132,14 +137,15 @@ class App:
             logging.error("Ping number specified in settings window is not a positive integer.")
             return
 
-        config.ping_number = ping_number
-
+        config.ping_count = ping_number
         config.set_quiet(self.quiet.get())
 
-        self.sett_win.destroy()
+        # TODO: Write configuration to file
+
+        self.conf_win.destroy()
 
 
-def start_gui():
+def start_gui(conf_errors):
     """Initialize and start the tkinter GUI"""
 
     # Hopefully this will catch any startupt errors tk might have
@@ -150,5 +156,5 @@ def start_gui():
         sys.exit(3)
 
     root.title("NetDash")
-    app = App(root)
+    app = App(root, conf_errors)
     root.mainloop()

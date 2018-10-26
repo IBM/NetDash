@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """Program Start"""
+# TODO: Add/correct docstrings
 
-import argparse
-import ipaddress
+import platform
 import logging
-import shlex
 import sys
+import os
+import shlex
+import ipaddress
 import threading
 
 import src.pinger as pinger
@@ -13,86 +15,68 @@ import src.ui as ui
 import src.config as config
 from src.host import Host, hosts
 
+CONFIG_FILE_NAME = "config.txt"
 
-DEFAULT_TIME = 30     # Default update cycle time
-DEFAULT_PING_NUM = 1  # Default number of pings to send
+config_errors = []  # Text for error windows for the UI once it starts
 
-TIME_HELP = "update cycle time (in seconds)"                # Time argument help message
-COUNT_HELP = "number of pings to send per host each cycle"  # Count argument help message
-QUIET_HELP = "supress informational messages"               # Quiet argument help message
+# Set configuration path based on system type
+if platform.system() in ['Linux', 'Unix', 'Darwin']:
+    config.path = os.path.expanduser("~/netdash/")
+elif platform.system() == 'Windows':
+    config.path = os.path.expandvars("%USERPROFILE%\\netdash\\")
+else:
+    logging.critical("System type '" + platform.system() + "' not supported.")
+    sys.exit(3)
 
+# TODO: Figure out what merits spawning an error window (add string to list) and what generally needs try catches
+# If a configuration file exists, read configuration in, otherwise create file with basic configuration
+if os.path.isfile(config.path + CONFIG_FILE_NAME):
+    fd = open(config.path + CONFIG_FILE_NAME, 'r')
 
-def positive_int(in_value):
-    """Check if argument is a positive integer"""
+    # Parse program configuration
+    conf = fd.readline().split()
 
-    try:
-        value = int(in_value)
-    except ValueError:
-        raise argparse.ArgumentTypeError(in_value + " is not a valid positive integer")
+    # TODO: Wrap these in try-catch, default each and add error string
+    config.cycle_time = int(conf[0])
+    config.ping_count = int(conf[1])
+    config.quiet = (conf[2] == "True")
 
-    if value <= 0:
-        raise argparse.ArgumentTypeError(in_value + " is not a valid positive integer")
+    # Parse host configuration
+    # Format: IP_ADDRESS "LABEL"
+    for line_num, line in enumerate(fd.readlines()):
+        line = line.strip()
 
-    return value
+        # Skip blank lines and comments
+        if not line or line[0] == '#':
+            continue
+        line_parts = shlex.split(line)
 
+        # Check validity of ip address, otherwise, skip it
+        try:
+            addr = ipaddress.ip_address(line_parts[0])
+        except ValueError:
+            logging.error("IP address on line " + str(line_num + 1) + " is not valid, skipping it.")
+            continue
 
-# Format log, remove username and insert a space
-logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', level=logging.INFO, datefmt='%m/%d/%Y %I:%M:%S %p')
+        # Subsequent additions of optional fields will require a "None" value to be supported
+        # If a label exists, use it
+        label = None
+        if len(line_parts) > 1:
+            label = line_parts[1]
 
-# Parse command line arguments
-parser = argparse.ArgumentParser(description="Network monitoring dashboard")
-parser.add_argument('path', help="path to configuration file")
-parser.add_argument('-t', '-time', nargs=1, type=positive_int, default=[DEFAULT_TIME], metavar='#', help=TIME_HELP)
-parser.add_argument('-c', '-count', nargs=1, type=positive_int, default=[DEFAULT_PING_NUM], metavar='#',
-                    help=COUNT_HELP)
-parser.add_argument('-q', '-quiet', action='store_true', default=False, help=QUIET_HELP)
+        # Add the host to the list
+        hosts.append(Host(addr, label=label))
+else:
+    # Create the directory if it doesn't exist
+    if not os.path.exists(config.path):
+        os.mkdir(config.path)
+    fd = open(config.path + CONFIG_FILE_NAME, 'x')
+    fd.write(str(config.cycle_time) + " " + str(config.ping_count) + " " + str(config.quiet) + "\n")
 
-args = parser.parse_args()
-config.cycle_time = args.t[0]
-config.ping_number = args.c[0]
-
-# Set quiet option
-config.set_quiet(args.q)
-
-# Open configuration file at specified path
-try:
-    file = open(args.path)
-except FileNotFoundError:
-    logging.critical("File does not exist.")
-    sys.exit(2)
-except IsADirectoryError:
-    logging.critical("Path is to a directory.")
-    sys.exit(2)
-
-# Parse configuration file
-for line_num, line in enumerate(file.readlines()):
-    line = line.strip()
-
-    # Skip blank lines and comments
-    if not line or line[0] == '#':
-        continue
-    line_parts = shlex.split(line)
-
-    # Check validity of ip address, otherwise, skip it
-    try:
-        addr = ipaddress.ip_address(line_parts[0])
-    except ValueError:
-        logging.error("IP address on line " + str(line_num + 1) + " is not valid, skipping it.")
-        continue
-
-    # Subsequent additions of optional fields will require a "None" value to be supported
-    # If a label exists, use it
-    label = None
-    if len(line_parts) > 1:
-        label = line_parts[1]
-
-    # Add the host to the list
-    hosts.append(Host(addr, label=label))
-
-file.close()
+fd.close()
 
 # Start pinger thread
 threading.Thread(target=pinger.ping_all, name="Pinger", daemon=True).start()
 
 # Start GUI
-ui.start_gui()
+ui.start_gui(config_errors)
