@@ -30,8 +30,8 @@ else:
 
 # TODO: Figure out what merits spawning an error window (add string to list) and what generally needs try catches
 # If a configuration file exists, read configuration in, otherwise create file with basic configuration
-if os.path.isfile(config.path + CONFIG_FILE_NAME):
-    fd = open(config.path + CONFIG_FILE_NAME, 'r')
+if os.path.isfile(config.path + config.file_name):
+    fd = open(config.path + config.file_name, 'r')
 
     # Parse program configuration
     conf = fd.readline().split()
@@ -70,8 +70,8 @@ else:
     # Create the directory if it doesn't exist
     if not os.path.exists(config.path):
         os.mkdir(config.path)
-    fd = open(config.path + CONFIG_FILE_NAME, 'x')
-    fd.write(str(config.cycle_time) + " " + str(config.ping_count) + " " + str(config.quiet) + "\n")
+    fd = open(config.path + config.file_name, 'x')
+    fd.write(str(config.cycle_time) + " " + str(config.ping_count) + " " + str(config.quiet) + "\n\n")
 
 fd.close()
 

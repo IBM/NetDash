@@ -2,6 +2,7 @@
 
 import logging
 import sys
+import threading
 
 try:
     import tkinter as tk
@@ -91,17 +92,19 @@ class App:
         self.quiet = tk.BooleanVar()
         quiet_check_button = tk.Checkbutton(self.conf_win, variable=self.quiet)
 
-        # TODO: Add cancel button, adjust location of apply button if nessisary
-        # Apply button
+        # TODO: Check button layout, adjust if needed
+        # Apply and cancel buttons
         apply_button = tk.Button(self.conf_win, text="Apply", command=self.apply_settings)
+        cancel_button = tk.Button(self.conf_win, text="Cancel", command=self.conf_win.destroy)
 
         # Grid layout
         self.cycle_entry.grid(row=0, column=1)
         self.count_entry.grid(row=1, column=1)
         quiet_check_button.grid(row=2, column=1)
-        apply_button.grid(row=3, column=1)
+        apply_button.grid(row=3, column=0)
+        cancel_button.grid(row=3, column=1)
 
-        # Default values
+        # Default field values
         self.cycle_entry.insert(0, str(config.cycle_time))
         self.count_entry.insert(0, str(config.ping_count))
         self.quiet.set(config.quiet)
@@ -109,6 +112,7 @@ class App:
     def apply_settings(self):
         """Check and apply settings from settings window"""
 
+        # TODO: Add/track if configuration has changed?
         # Ensure entered cycle_time is non-zero positive integer
         try:
             cycle_time = int(self.cycle_entry.get())
@@ -140,7 +144,8 @@ class App:
         config.ping_count = ping_number
         config.set_quiet(self.quiet.get())
 
-        # TODO: Write configuration to file
+        # Write configuration to file
+        threading.Thread(target=config.write_configuration, name="Write", daemon=True).start()
 
         self.conf_win.destroy()
 
