@@ -1,4 +1,11 @@
+30 1 False
+
 # This is a comment, the program will skip this line, and any blank lines
+
+# The first line sets general program settings
+# Format: CYCLE_TIME PING_COUNT QUIET_MODE
+
+# Remaining lines define hosts to ping
 # All but the last IP address should always succeed
 # Quotes are required for the LABEL if it includes a space
 # Format: IP_ADDRESS "LABEL"

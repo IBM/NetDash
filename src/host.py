@@ -22,7 +22,11 @@ class Host:
             self.label = label
 
     def set_status(self, status):
-        """Set the status of the Host and the status color."""
+        """Set the status of the Host and the status color.
+
+        Positional arguments:
+        status (string) - status of the host.
+        """
 
         self.status = status
 

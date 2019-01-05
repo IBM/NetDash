@@ -12,7 +12,12 @@ ping_all_event = threading.Event()  # Threading event for pinging all hosts
 
 
 def ping(host, count):
-    """Ping IP address 'count' times"""
+    """Ping IP address.
+
+    Positional arguments:
+    host (String) - IP address to ping.
+    count (Integer) - number of times to ping address.
+    """
 
     ip_addr = str(host.ip)
     version = host.ip.version
@@ -41,7 +46,7 @@ def ping(host, count):
 
 
 def ping_all():
-    """Spawn a thread to ping each host, then sleep for cycle_time seconds"""
+    """Spawn a thread to ping each host, then sleep for cycle_time seconds."""
 
     while True:
         threads = []

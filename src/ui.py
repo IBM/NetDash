@@ -33,9 +33,9 @@ class App:
         self.quiet = None            # Quiet mode variable for widget in settings window
         self.config_errors = errors  # Strings for error windows that need to be created
 
-        # TODO: Spawn error windows at some point, log error string also
         # Menu bar
         menu_bar = tk.Menu(master)
+        # TODO: Add 'about' option with program information and version number
         # File menu
         file_menu = tk.Menu(menu_bar, tearoff=0)
         file_menu.add_command(label="Configuration", command=self.configuration_window)
@@ -72,6 +72,20 @@ class App:
             host.status_widget = host_status
 
             column += 1
+
+        # Display configuration errors if they exist
+        if len(errors) > 0:
+            threading.Thread(target=App.display_config_errors, args=[self.config_errors], daemon=True).start()
+
+    @staticmethod
+    def display_config_errors(errors):
+        """Display configuration errors message box."""
+
+        msg = "Configuration file error(s):"
+        for error in errors:
+            msg += "\n\n" + error
+        msg += "\n\nConfirm settings in configuration window."
+        messagebox.showerror("Error(s)", msg)
 
     def configuration_window(self):
         """Configuration window accessed through file menu in menu bar."""
@@ -110,7 +124,7 @@ class App:
         self.quiet.set(config.quiet)
 
     def apply_settings(self):
-        """Check and apply settings from settings window"""
+        """Check and apply settings from settings window."""
 
         # TODO: Add/track if configuration has changed?
         # Ensure entered cycle_time is non-zero positive integer
@@ -151,13 +165,13 @@ class App:
 
 
 def start_gui(conf_errors):
-    """Initialize and start the tkinter GUI"""
+    """Initialize and start the tkinter GUI."""
 
     # Hopefully this will catch any startupt errors tk might have
     try:
         root = tk.Tk()
     except tk.TclError as exc:
-        logging.CRITICAL("Could not start GUI:" + exc)
+        logging.CRITICAL("Could not start GUI: " + exc)
         sys.exit(3)
 
     root.title("NetDash")
