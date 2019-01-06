@@ -75,7 +75,8 @@ class App:
 
         # Display configuration errors if they exist
         if len(errors) > 0:
-            threading.Thread(target=App.display_config_errors, args=[self.config_errors], daemon=True).start()
+            threading.Thread(target=App.display_config_errors, args=[self.config_errors], name="Conf-Errors",
+                             daemon=True).start()
 
     @staticmethod
     def display_config_errors(errors):

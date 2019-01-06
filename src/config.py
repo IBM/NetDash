@@ -8,12 +8,13 @@ except ImportError:
     logging.critical("Can not import tkinter, may not be installed.")
     sys.exit(3)
 
+DEFAULT_CONFIG_NAME = "config.txt"
 DEFAULT_CYCLE_TIME = 30
 DEFAULT_PING_COUNT = 1
 DEFAULT_QUIET_MODE = False
 
 path = ""
-file_name = "config_example.txt"
+file_name = DEFAULT_CONFIG_NAME
 cycle_time = DEFAULT_CYCLE_TIME
 ping_count = DEFAULT_PING_COUNT
 quiet = DEFAULT_QUIET_MODE
@@ -46,5 +47,6 @@ def write_configuration():
         with open(path + file_name, 'w') as file:
             file.writelines(lines)
     except OSError as exc:
+        # TODO: See if I can't move this back out to UI, get rid of the import in here
         messagebox.showerror("Error", "Could not write to configuration file:" + str(exc))
         logging.error("Could not write to configuration file: " + str(exc))

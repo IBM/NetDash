@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Program Start"""
+# TODO: Add setting for configuration file location?
 # TODO: Add logging file, maybe setting?
 # TODO: Make host list editable in GUI
 
@@ -16,11 +17,11 @@ import src.ui as ui
 import src.config as config
 from src.host import Host, hosts
 
-CONFIG_FILE_NAME = "config_example.txt"
 
 config_errors = []  # Text for error windows for the UI once it starts
 
-logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
+# Set logging format and other configuration
+logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', level=logging.INFO, datefmt='%m-%d-%y %H:%M:%S')
 
 # Set configuration path based on system type
 if platform.system() in ['Linux', 'Unix', 'Darwin']:

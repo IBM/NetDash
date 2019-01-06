@@ -42,7 +42,7 @@ def ping(host, count):
     else:
         host.set_status("OTHER")
 
-    logging.info("Host: " + str(host.ip) + " Result: " + host.status)
+    logging.info(str(host.ip) + " - " + host.status)
 
 
 def ping_all():
